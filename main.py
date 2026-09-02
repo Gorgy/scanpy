@@ -1,40 +1,61 @@
-events = [
-    {
-        "device_id": "scanner-001",
-        "event_type": "barcode_scanned",
-        "barcode": "5901234123457",
-        "processing_time_ms": 42,
-        "event_id": "evt-001",
-    },
-    {
-        "device_id": "",
-        "event_type": "unknown",
-        "barcode": "",
-        "processing_time_ms": -5,
-        "event_id": "evt-002",
-    },
-    {
-        "device_id": "scanner-002",
-        "event_type": "scan_failed",
-        "barcode": "5901234123457",
-        "processing_time_ms": -5,
-        "event_id": "evt-006",
-    },
-    {
-        "device_id": "scanner-002",
-        "event_type": "scan_failed",
-        "barcode": "5901234123457",
-        "processing_time_ms": -5,
-        "event_id": "evt-001",
-    },
-    {
-        "device_id": "scanner-003",
-        "event_type": "barcode_scanned",
-        "barcode": "",
-        "processing_time_ms": 500,
-        "event_id": "evt-005",
-    },
-]
+import json
+import numbers
+from pathlib import Path
+
+EVENT_REQUIRED_FIELDS = {
+    "device_id",
+    "event_type",
+    "barcode",
+    "processing_time_ms",
+    "event_id",
+}
+
+EVENT_STRING_FIELDS = {
+    "device_id",
+    "event_type",
+    "barcode",
+    "event_id",
+}
+
+VALID_EVENT_TYPES = {"barcode_scanned", "scan_failed"}
+
+
+def load_events_from_json(path):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if not isinstance(data, list):
+            print("Не удалось загрузить события: ожидался список событий")
+            return []
+        return data
+    except FileNotFoundError as e:
+        print(f"Ошибка чтения файла: {e.filename}")
+        return []
+    except json.JSONDecodeError as e:
+        print(f"JSON поврежден: {e.msg} on {e.lineno};{e.colno}")
+        return []
+
+
+def get_missing_fields(event_item):
+    event_fields = set(event_item.keys())
+
+    return set(EVENT_REQUIRED_FIELDS.difference(event_fields))
+
+
+def get_valid_events_list(events_list):
+    valid_events = []
+    for key, value in enumerate(events_list):
+        if not isinstance(value, dict):
+            print(f"Запись #{key} пропущена: ожидался объект события")
+        else:
+            missing_fields = get_missing_fields(value)
+            if not missing_fields:
+                valid_events.append(value)
+            else:
+                print(
+                    f"Запись #{key} пропущена: пропущены обязательные поля {missing_fields} в словаре"
+                )
+    return valid_events
 
 
 def print_header(title):
@@ -45,6 +66,7 @@ def create_stats():
     return {
         "total_events": 0,
         "successful_events": 0,
+        "successful_events_list": [],
         "rejected_events": 0,
         "error_stats": {},
         "unique_events_ids": set(),
@@ -65,13 +87,22 @@ def get_duplicate_event_ids(events_list):
 
 def validate_event(event_item):
     errors = []
-    valid_event_types = {"barcode_scanned", "scan_failed"}
+    for key, value in event_item.items():
+        if key in EVENT_STRING_FIELDS and not isinstance(value, str):
+            errors.append(f"{key} is not a string")
     if not event_item["device_id"]:
         errors.append("device_id is required")
-    if event_item["event_type"] not in valid_event_types:
+    if event_item["event_type"] not in VALID_EVENT_TYPES:
         errors.append("event_type is invalid")
-    if event_item["processing_time_ms"] < 0:
-        errors.append("processing_time_ms is less than 0")
+    if (
+        not isinstance(event_item["processing_time_ms"], numbers.Number)
+        or event_item["processing_time_ms"] < 0
+    ):
+        errors.append(
+            "processing_time_ms is less than 0"
+            if isinstance(event_item["processing_time_ms"], numbers.Number)
+            else "processing_time_ms is not a number"
+        )
     if event_item["event_type"] == "barcode_scanned" and not event_item["barcode"]:
         errors.append("barcode is required")
     return errors
@@ -118,11 +149,19 @@ def update_events(stats_dict_item, event_item):
 
 
 def get_barcodes(events_list):
-    return [event["barcode"] for event in events_list if event["barcode"]]
+    return [
+        event["barcode"]
+        for event in events_list
+        if event["barcode"] and isinstance(event["barcode"], str)
+    ]
 
 
 def get_unique_barcodes(events_list):
-    return {event["barcode"] for event in events_list if event["barcode"]}
+    return {
+        event["barcode"]
+        for event in events_list
+        if event["barcode"] and isinstance(event["barcode"], str)
+    }
 
 
 def get_events_dict_by_event_id(events_list):
@@ -163,10 +202,6 @@ def print_events_by_device(stats_dict):
 
 def process_event(event_item, stats_dict):
     event_errors = validate_event(event_item)
-    stats_dict["unique_events_ids"].add(event_item["event_id"])
-    update_events(stats_dict["events_by_device"], event_item["device_id"])
-    update_events(stats_dict["events_by_type"], event_item["event_type"])
-
     if event_errors:
         stats_dict["rejected_events"] += 1
 
@@ -175,6 +210,10 @@ def process_event(event_item, stats_dict):
 
     else:
         stats_dict["successful_events"] += 1
+        stats_dict["successful_events_list"].append(event_item)
+        stats_dict["unique_events_ids"].add(event_item["event_id"])
+        update_events(stats_dict["events_by_device"], event_item["device_id"])
+        update_events(stats_dict["events_by_type"], event_item["event_type"])
         print_event(event_item)
 
 
@@ -190,23 +229,37 @@ def print_events_len(events_dict):
 
 
 def process_events(event_list, stats_dict):
-    for event in event_list:
+    for value in event_list:
         stats_dict["total_events"] += 1
-        process_event(event, stats_dict)
+        process_event(value, stats_dict)
 
 
-stats = create_stats()
-barcodes = get_barcodes(events)
-barcodes_unique = get_unique_barcodes(events)
-events_dict = get_events_dict_by_event_id(events)
-duplicate = get_duplicate_event_ids(events)
+def print_report(stats, barcodes, barcodes_unique, events_dict, duplicate):
+    print_stats(stats)
+    print_error_stats(stats)
+    print_events_by_device(stats)
+    print_barcodes(barcodes)
+    print_barcodes(barcodes_unique, "Уникальные штрихкоды")
+    print_events_len(events_dict)
+    print_duplicate_events(duplicate)
 
-process_events(events, stats)
-print_stats(stats)
-print_error_stats(stats)
-print_events_by_device(stats)
-print_barcodes(barcodes)
-print_barcodes(barcodes_unique, "Уникальные штрихкоды")
-print_events_len(events_dict)
-print_duplicate_events(duplicate)
-print_duplicate_events({})
+
+def main():
+    events_list = load_events_from_json(Path(__file__).parent / "data" / "events.json")
+    events = get_valid_events_list(events_list)
+
+    stats = create_stats()
+    successful_events = stats["successful_events_list"]
+
+    process_events(events, stats)
+
+    barcodes = get_barcodes(successful_events)
+    barcodes_unique = get_unique_barcodes(successful_events)
+    events_dict = get_events_dict_by_event_id(successful_events)
+    duplicate = get_duplicate_event_ids(successful_events)
+
+    print_report(stats, barcodes, barcodes_unique, events_dict, duplicate)
+
+
+if __name__ == "__main__":
+    main()
