@@ -1,6 +1,9 @@
 import numbers
+from typing import Any
 
-EVENT_REQUIRED_FIELDS = {
+from schema_data import EventItem
+
+EVENT_REQUIRED_FIELDS: set[str] = {
     "device_id",
     "event_type",
     "barcode",
@@ -8,23 +11,23 @@ EVENT_REQUIRED_FIELDS = {
     "event_id",
 }
 
-EVENT_STRING_FIELDS = {
+EVENT_STRING_FIELDS: set[str] = {
     "device_id",
     "event_type",
     "barcode",
     "event_id",
 }
 
-VALID_EVENT_TYPES = {"barcode_scanned", "scan_failed"}
+VALID_EVENT_TYPES: set[str] = {"barcode_scanned", "scan_failed"}
 
 
-def get_missing_fields(event_item):
+def get_missing_fields(event_item: dict[str, Any]) -> set[str]:
     event_fields = set(event_item.keys())
 
     return set(EVENT_REQUIRED_FIELDS.difference(event_fields))
 
 
-def get_valid_events_list(events_list):
+def get_valid_events_list(events_list: list[dict[str, Any]]) -> list[EventItem]:
     valid_events = []
     for key, value in enumerate(events_list):
         if not isinstance(value, dict):
@@ -40,8 +43,8 @@ def get_valid_events_list(events_list):
     return valid_events
 
 
-def validate_event(event_item):
-    errors = []
+def validate_event(event_item: EventItem) -> list[str]:
+    errors: list[str] = []
     for key, value in event_item.items():
         if key in EVENT_STRING_FIELDS and not isinstance(value, str):
             errors.append(f"{key} is not a string")

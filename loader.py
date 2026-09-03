@@ -1,7 +1,9 @@
 import json
+from pathlib import Path
+from typing import Any
 
 
-def load_events_from_json(path):
+def load_events_from_json(path: Path) -> list[dict[str, Any]]:
     try:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
