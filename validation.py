@@ -1,7 +1,7 @@
 import numbers
 from typing import Any
 
-from schema_data import EventItem
+from models import EventItem
 
 EVENT_REQUIRED_FIELDS: set[str] = {
     "device_id",

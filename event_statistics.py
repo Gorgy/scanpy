@@ -1,4 +1,4 @@
-from schema_data import EventItem, Stats
+from models import Event, Stats
 
 
 def create_stats() -> Stats:
@@ -14,13 +14,13 @@ def create_stats() -> Stats:
     }
 
 
-def get_duplicate_event_ids(events_list: list[EventItem]) -> set[str]:
+def get_duplicate_event_ids(events_list: list[Event]) -> set[str]:
     dict_events = {}
     for event in events_list:
-        if event["event_id"] not in dict_events:
-            dict_events[event["event_id"]] = 1
+        if event.event_id not in dict_events:
+            dict_events[event.event_id] = 1
         else:
-            dict_events[event["event_id"]] += 1
+            dict_events[event.event_id] += 1
     return {key for key, value in dict_events.items() if value > 1}
 
 
@@ -39,23 +39,23 @@ def update_events(stats_dict_item: dict[str, int], event_item: str) -> None:
         stats_dict_item[event_item] += 1
 
 
-def get_barcodes(events_list: list[EventItem]) -> list[str]:
+def get_barcodes(events_list: list[Event]) -> list[str]:
     return [
-        event["barcode"]
+        event.barcode
         for event in events_list
-        if event["barcode"] and isinstance(event["barcode"], str)
+        if event.barcode and isinstance(event.barcode, str)
     ]
 
 
-def get_unique_barcodes(events_list: list[EventItem]) -> set[str]:
+def get_unique_barcodes(events_list: list[Event]) -> set[str]:
     return {
-        event["barcode"]
+        event.barcode
         for event in events_list
-        if event["barcode"] and isinstance(event["barcode"], str)
+        if event.barcode and isinstance(event.barcode, str)
     }
 
 
 def get_events_dict_by_event_id(
-    events_list: list[EventItem],
-) -> dict[str, EventItem]:
-    return {event["event_id"]: event for event in events_list}
+    events_list: list[Event],
+) -> dict[str, Event]:
+    return {event.event_id: event for event in events_list}

@@ -1,4 +1,4 @@
-from schema_data import Stats, EventItem
+from models import Event, Stats
 
 
 def print_header(title: str) -> None:
@@ -14,13 +14,13 @@ def print_stats(stats_item: Stats) -> None:
     )
 
 
-def print_event(event_item: EventItem) -> None:
+def print_event(event_item: Event) -> None:
     print_header("Событие успешно:")
     print(
-        f"{'Устройство:':<20} {event_item["device_id"]}\n"
-        f"{'Событие:':<20} {event_item["event_type"]}\n"
-        f"{'Штрихкод:':<20} {event_item["barcode"]}\n"
-        f"{'Время обработки:':<20} {event_item["processing_time_ms"]} мс"
+        f"{'Устройство:':<20} {event_item.device_id}\n"
+        f"{'Событие:':<20} {event_item.event_type}\n"
+        f"{'Штрихкод:':<20} {event_item.barcode}\n"
+        f"{'Время обработки:':<20} {event_item.processing_time_ms} мс"
     )
 
 
@@ -71,7 +71,7 @@ def print_duplicate_events(duplicate_ids: set[str]) -> None:
         print("Дубликатов нет")
 
 
-def print_events_len(events_dict: dict[str, EventItem]) -> None:
+def print_events_len(events_dict: dict[str, Event]) -> None:
     print(f"Событий по ID: {len(events_dict)}")
 
 
@@ -79,7 +79,7 @@ def print_report(
     stats: Stats,
     barcodes: list[str],
     barcodes_unique: set[str],
-    events_dict: dict[str, EventItem],
+    events_dict: dict[str, Event],
     duplicate: set[str],
 ) -> None:
     print_stats(stats)
