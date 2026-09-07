@@ -22,7 +22,7 @@ def main() -> None:
     events: list[EventItem] = get_valid_events_list(events_list)
 
     stats: Stats = create_stats()
-    successful_events: list[Event] = stats["successful_events_list"]
+    successful_events: list[Event] = stats.successful_events_list
 
     process_events(events, stats)
 

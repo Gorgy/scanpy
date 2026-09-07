@@ -8,9 +8,9 @@ def print_header(title: str) -> None:
 def print_stats(stats_item: Stats) -> None:
     print_header("Статистика:")
     print(
-        f"Всего событий: {stats_item["total_events"]}\n"
-        f"Успешных: {stats_item["successful_events"]}\n"
-        f"Отклонённых: {stats_item["rejected_events"]}"
+        f"Всего событий: {stats_item.total_events}\n"
+        f"Успешных: {stats_item.successful_events}\n"
+        f"Отклонённых: {stats_item.rejected_events}"
     )
 
 
@@ -40,7 +40,7 @@ def print_barcodes(
 
 
 def print_error_stats(stats_dict: Stats) -> None:
-    error_stats = stats_dict["error_stats"]
+    error_stats = stats_dict.error_stats
     if error_stats:
         print_header("Статистика ошибок")
     for error, count in error_stats.items():
@@ -48,9 +48,9 @@ def print_error_stats(stats_dict: Stats) -> None:
 
 
 def print_events_by_device(stats_dict: Stats) -> None:
-    events_by_device = stats_dict["events_by_device"]
-    events_by_type = stats_dict["events_by_type"]
-    events_ids = stats_dict["unique_events_ids"]
+    events_by_device = stats_dict.events_by_device
+    events_by_type = stats_dict.events_by_type
+    events_ids = stats_dict.unique_events_ids
 
     print(f"\nУникальных событий: {len(events_ids)}")
     if events_by_device:

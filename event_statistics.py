@@ -2,16 +2,7 @@ from models import Event, Stats
 
 
 def create_stats() -> Stats:
-    return {
-        "total_events": 0,
-        "successful_events": 0,
-        "successful_events_list": [],
-        "rejected_events": 0,
-        "error_stats": {},
-        "unique_events_ids": set(),
-        "events_by_device": {},
-        "events_by_type": {},
-    }
+    return Stats()
 
 
 def get_duplicate_event_ids(events_list: list[Event]) -> set[str]:
