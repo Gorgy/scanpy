@@ -31,19 +31,11 @@ def update_events(stats_dict_item: dict[str, int], event_item: str) -> None:
 
 
 def get_barcodes(events_list: list[Event]) -> list[str]:
-    return [
-        event.barcode
-        for event in events_list
-        if event.barcode and isinstance(event.barcode, str)
-    ]
+    return [event.barcode for event in events_list if event.has_barcode()]
 
 
 def get_unique_barcodes(events_list: list[Event]) -> set[str]:
-    return {
-        event.barcode
-        for event in events_list
-        if event.barcode and isinstance(event.barcode, str)
-    }
+    return {event.barcode for event in events_list if event.has_barcode()}
 
 
 def get_events_dict_by_event_id(

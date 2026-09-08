@@ -10,6 +10,7 @@ def print_stats(stats_item: Stats) -> None:
     print(
         f"Всего событий: {stats_item.total_events}\n"
         f"Успешных: {stats_item.successful_events}\n"
+        f"Медленных: {stats_item.slow_events}\n"
         f"Отклонённых: {stats_item.rejected_events}"
     )
 

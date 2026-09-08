@@ -13,7 +13,10 @@ def process_event(event_item: EventItem, stats_dict: Stats) -> None:
 
     else:
         event = event_from_dict(event_item)
-        stats_dict.successful_events += 1
+        if event.is_slow():
+            stats_dict.slow_events += 1
+        if event.is_successful_scan():
+            stats_dict.successful_events += 1
         stats_dict.successful_events_list.append(event)
         stats_dict.unique_events_ids.add(event.event_id)
         update_events(stats_dict.events_by_device, event.device_id)

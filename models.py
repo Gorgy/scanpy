@@ -18,9 +18,19 @@ class Event:
     processing_time_ms: int
     event_id: str
 
+    def is_successful_scan(self) -> bool:
+        return self.event_type == "barcode_scanned"
+
+    def has_barcode(self) -> bool:
+        return bool(self.barcode)
+
+    def is_slow(self) -> bool:
+        return self.processing_time_ms > 100
+
 
 @dataclass
 class Stats:
+    slow_events: int = 0
     total_events: int = 0
     successful_events: int = 0
     rejected_events: int = 0

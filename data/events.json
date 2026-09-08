@@ -7,30 +7,30 @@
     "event_id": "evt-001"
   },
   {
-    "device_id": "",
-    "event_type": "unknown",
-    "barcode": "",
-    "processing_time_ms": -5,
+    "device_id": "scanner-005",
+    "event_type": "barcode_scanned",
+    "barcode": "5901234123460",
+    "processing_time_ms": 250,
     "event_id": "evt-002"
   },
   {
     "device_id": "scanner-002",
     "event_type": "scan_failed",
     "barcode": "5901234123457",
-    "processing_time_ms": -5,
+    "processing_time_ms": 99,
     "event_id": "evt-006"
   },
   {
     "device_id": "scanner-002",
     "event_type": "scan_failed",
     "barcode": "5901234123457",
-    "processing_time_ms": -5,
-    "event_id": "evt-001"
+    "processing_time_ms": 102,
+    "event_id": "evt-011"
   },
   {
     "device_id": "scanner-003",
     "event_type": "barcode_scanned",
-    "barcode": "",
+    "barcode": "5901234123567",
     "processing_time_ms": 500,
     "event_id": "evt-005"
   }
